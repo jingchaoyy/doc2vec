@@ -1,6 +1,14 @@
+""" Analysis user patterns (log files) with doc2vec,
+each user behavior has been saved as a single json file,
+including user queries, datasets, temporal resolution, etc.
+Author: Jingchao Yang
+Date: Mar 27 2018
+"""
+
 from os import listdir
 import json
 import gensim
+
 LabeledSentence = gensim.models.doc2vec.LabeledSentence
 
 """ Doc2Vec is using two things when training your model, 
@@ -13,24 +21,50 @@ docLabels = [f for f in listdir("/Users/YJccccc/doc2vec/userData/") if f.endswit
 print(docLabels)
 
 data = []
-sessionID, queryM, datasetsM = [], [], []
 for doc in docLabels:
     # read each json file
     userData = json.load(open("/Users/YJccccc/doc2vec/userData/" + doc))
     # getting data for only Dataset-Description
-    sessionID.append(userData['sessionId'])
+    # sessionID.append(userData['sessionId'])
+
     clicks = userData["click"]
-    query, datasets = [], []
+    query, datasets, platform, tResolution, measur = [], [], [], [], []
+    # loop into "click" and collect all user queries and clicked datasets
     for i in range(0, len(clicks)):
         query.append(clicks[i]['query'])
         datasets.append(clicks[i]['dataset'])
-    # queryM.append(' '.join(query))
-    # datasetsM.append(' '.join(datasets))
-    data.append(' '.join(query) + ' '.join(datasets))
+        # check if there has the platform key under click
 
-# print(data[2])
-# for cont in datasetsM:
-#     print(cont,"\n")
+        if clicks[i].get('platform'):
+            platform.append(clicks[i]['platform'])
+        else:
+            platform.append(" ")
+
+        # check if there has the temporalresolution key under click
+        if clicks[i].get('temporalresolution'):
+            tList = []
+            tList.append(clicks[i]['temporalresolution'])
+            # loop into the temporalresolution and replace white space with underline
+            for j in tList:
+                tResolution.append(j.replace(" ", "_"))
+        else:
+            tResolution.append(" ")
+
+        # check if there has the measurement key under click
+        if clicks[i].get('measurement'):
+            tList = []
+            tList.append(clicks[i]['measurement'])
+            # loop into the measurement and replace white space with underline
+            for j in tList:
+                measur.append(j.replace(" ", "_"))
+        else:
+            measur.append(" ")
+
+    data.append('User Query: ' + ' '.join(query) + '\n' + 'Datasets: ' + ' '.join(datasets)
+                + '\n' + 'Platform: ' + ' '.join(platform) + '\n' + 'tResolution: ' + ' '.join(tResolution)
+                + '\n' + 'Measure: ' + ' '.join(measur))
+
+# print(data[1])
 
 """ Preparing the data for Gensim Doc2vec
 Gensim Doc2Vec needs model training data in an LabeledSentence iterator object
