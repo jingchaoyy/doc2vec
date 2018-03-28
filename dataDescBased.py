@@ -13,15 +13,28 @@ docLabels = []
 docLabels = [f for f in listdir("/Users/YJccccc/doc2vec/RawMetadata/") if f.endswith('.json')]
 print(docLabels)
 
-
-data = []  # storing all target text content
+data = []  # storing target text contents all together
 for doc in docLabels:
     # read each json file
     desc = json.load(open("/Users/YJccccc/doc2vec/RawMetadata/" + doc))
-    # getting data for only Dataset-Description
-    data.append(desc['Dataset-Description'])
+    # getting data for Dataset-LongName-Full and Dataset-Description
+    dName = desc['Dataset-LongName-Full']
+    dDesc = desc['Dataset-Description']
+    # first check if json has the Dataset-Metadata key
+    if desc.get('Dataset-Metadata'):
+        mData = desc['Dataset-Metadata']
+        dMetaArr = []
+        # loop into the Dataset-Metadata and replace white space with underline
+        for i in mData:
+            dMetaArr.append(i.replace(" ", "_"))
+        # convert list to string
+        dMeta = ', '.join(dMetaArr)
+    else:  # if not Dataset-Metadata key, put blank to hole a position in the list
+        dMeta = " "
 
-# print(data[1])
+    data.append(dName + '\n' + dDesc+ '\n' + dMeta)
+# print(data[3])
+
 # for cont in data:
 #     print(cont,"\n")
 
